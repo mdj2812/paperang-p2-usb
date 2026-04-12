@@ -305,7 +305,7 @@ class PaperangP2:
         img.save(tmp_path)
         return self.print_image(tmp_path, heat_density=heat_density)
     
-    def print_qr(self, content, box_size=10, heat_density=75):
+    def print_qr(self, content, box_size=10, heat_density=75, max_width=None):
         """Print QR code"""
         try:
             import qrcode
@@ -313,16 +313,38 @@ class PaperangP2:
             print("Please install qrcode: pip3 install qrcode[pil]")
             return False
         
-        qr = qrcode.QRCode(version=1, box_size=box_size, border=2)
+        # Calculate optimal box size to fill width
+        if max_width is None:
+            max_width = PRINT_WIDTH - 40  # Default: leave 20px margin on each side
+        
+        # Calculate optimal box size
+        # QR code size = (version * 4 + 17) * box_size + 2 * border * box_size
+        # For version 5: (5*4+17) = 37 modules, with border=2: 41 modules total
+        # To fit max_width: box_size = max_width // 41
+        optimal_box_size = max_width // 41
+        if optimal_box_size < 4:
+            optimal_box_size = 4
+        
+        # Generate QR code with calculated box size
+        qr = qrcode.QRCode(version=None, box_size=optimal_box_size, border=2)
         qr.add_data(content)
         qr.make(fit=True)
         
+        # Create image and ensure it's square
         img = qr.make_image(fill_color="black", back_color="white")
         
-        # Center the QR code
-        qr_size = min(img.width, PRINT_WIDTH - 40)
+        # Convert to RGB if necessary and ensure square
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+        
+        # The QR code should be square, but ensure it
+        qr_size = min(img.width, img.height, max_width)
         img = img.resize((qr_size, qr_size), Image.NEAREST)
         
+        # Convert to 1-bit for printing
+        img = img.convert('L').point(lambda x: 0 if x < 128 else 255, '1')
+        
+        # Create canvas and center QR code
         canvas = Image.new('1', (PRINT_WIDTH, qr_size + 20), 1)
         offset_x = (PRINT_WIDTH - qr_size) // 2
         canvas.paste(img, (offset_x, 10))
@@ -450,6 +472,7 @@ def main():
     parser.add_argument('--brightness', type=float, help='Brightness multiplier (<1 = darker, >1 = brighter)')
     parser.add_argument('--contrast', type=float, help='Contrast multiplier (<1 = less contrast, >1 = more contrast)')
     parser.add_argument('-q', '--qr', help='Print QR code')
+    parser.add_argument('--qr-size', type=int, default=500, help='QR code width in pixels (default 500, max 576)')
     parser.add_argument('-f', '--font-size', type=int, default=24, help='Font size')
     parser.add_argument('-d', '--density', type=int, help='Heat density 0-100')
     parser.add_argument('--test', action='store_true', help='Print test page')
@@ -498,7 +521,7 @@ def main():
         elif args.image:
             printer.print_image(args.image, heat_density=heat_density, threshold=threshold, brightness=brightness, contrast=contrast)
         elif args.qr:
-            printer.print_qr(args.qr, heat_density=heat_density)
+            printer.print_qr(args.qr, heat_density=heat_density, max_width=args.qr_size)
         else:
             # Default test text
             test_text = """Paperang P2 Test Print
