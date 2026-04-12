@@ -5,7 +5,7 @@ description: Control Paperang P2 thermal printer via USB on Linux. Use when user
 
 # Paperang P2 Printer Control
 
-基于 [hurui200320/java-paperang-p2-usb](https://github.com/hurui200320/java-paperang-p2-usb) 协议实现的 Python 版本。
+Based on [hurui200320/java-paperang-p2-usb](https://github.com/hurui200320/java-paperang-p2-usb) protocol implementation.
 
 Control Paperang P2 thermal printer via USB on Linux systems.
 
@@ -19,7 +19,7 @@ Control Paperang P2 thermal printer via USB on Linux systems.
 
 ```bash
 # Install dependencies
-pip3 install --break-system-packages pyusb pillow qrcode[pil]
+pip3 install pyusb pillow qrcode[pil]
 
 # Or system-wide
 sudo apt-get install python3-usb python3-pil python3-qrcode
@@ -31,29 +31,29 @@ sudo apt-get install python3-usb python3-pil python3-qrcode
 
 ```bash
 # Print test page
-echo <sudo_password> | sudo -S python3 scripts/paperang_p2.py --test
+echo <sudo_password> | sudo -S python3 paperang_p2.py --test
 
 # Print pattern test (test line/column/multi-packet)
-echo <sudo_password> | sudo -S python3 scripts/paperang_p2.py --pattern-test
+echo <sudo_password> | sudo -S python3 paperang_p2.py --pattern-test
 
 # Print heat density test (show different density levels)
-echo <sudo_password> | sudo -S python3 scripts/paperang_p2.py --density-test
+echo <sudo_password> | sudo -S python3 paperang_p2.py --density-test
 
 # Print text
-echo <sudo_password> | sudo -S python3 scripts/paperang_p2.py -t "Hello World"
+echo <sudo_password> | sudo -S python3 paperang_p2.py -t "Hello World"
 
 # Print with custom heat density (0-100, default 75)
-echo <sudo_password> | sudo -S python3 scripts/paperang_p2.py -t "Dark text" -d 100
+echo <sudo_password> | sudo -S python3 paperang_p2.py -t "Dark text" -d 100
 
 # Print image
-echo <sudo_password> | sudo -S python3 scripts/paperang_p2.py -i /path/to/image.png
+echo <sudo_password> | sudo -S python3 paperang_p2.py -i /path/to/image.png
 
 # Print QR code
-echo <sudo_password> | sudo -S python3 scripts/paperang_p2.py -q "https://example.com"
+echo <sudo_password> | sudo -S python3 paperang_p2.py -q "https://example.com"
 
 # Get status/battery
-echo <sudo_password> | sudo -S python3 scripts/paperang_p2.py --status
-echo <sudo_password> | sudo -S python3 scripts/paperang_p2.py --battery
+echo <sudo_password> | sudo -S python3 paperang_p2.py --status
+echo <sudo_password> | sudo -S python3 paperang_p2.py --battery
 ```
 
 ### Python API
@@ -89,7 +89,7 @@ Based on [java-paperang-p2-usb](https://github.com/hurui200320/java-paperang-p2-
 
 - Vendor ID: 0x4348
 - Product ID: 0x5584
-- Print width: 384 pixels (48 bytes/line)
+- Print width: 576 pixels (72 bytes/line)
 
 ### Packet Format
 
@@ -127,6 +127,6 @@ Uses custom seed `0x35769521` (standard CRC32 uses `0x00000000`).
 - [python-paperang](https://github.com/tinyprinter/python-paperang) - Python Bluetooth version
 - [Paperang protocol blog](https://www.ihcblog.com/miaomiaoji/) - Chinese blog post
 
-## Script Location
+## License
 
-The main script is at `scripts/paperang_p2.py`.
+MIT License
