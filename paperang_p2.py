@@ -171,12 +171,16 @@ class PaperangP2:
         """打印位图数据 (按行分包，参考 Java 项目)"""
         # 每包包含的行数: 1023 / 72 = 14 行
         lines_per_packet = MAX_PACKET_DATA // width_bytes  # 14
-        bytes_per_packet = lines_per_packet * width_bytes  # 1008
         
         total_bytes = len(bitmap_data)
         total_lines = total_bytes // width_bytes
+        
+        # 计算总包数
+        total_packets = (total_lines + lines_per_packet - 1) // lines_per_packet
+        
         offset = 0
         line_offset = 0
+        packet_idx = 0
         
         while offset < total_bytes:
             # 计算当前包包含的行数
@@ -184,9 +188,9 @@ class PaperangP2:
             current_lines = min(lines_per_packet, remaining_lines)
             current_bytes = current_lines * width_bytes
             
-            # 计算剩余包数
-            next_line_offset = line_offset + current_lines
-            remaining_packets = (total_lines - next_line_offset + lines_per_packet - 1) // lines_per_packet
+            # 计算剩余包数 (当前包发送后还剩多少包)
+            packet_idx += 1
+            remaining_packets = total_packets - packet_idx
             
             chunk = bitmap_data[offset:offset + current_bytes]
             packet = pack_packet(0x00, chunk, remaining_packets)
@@ -210,7 +214,7 @@ class PaperangP2:
         # 打开图片
         img = Image.open(image_path)
         
-        # 调整宽度为 384 像素
+        # 调整宽度为 576 像素
         if img.width != PRINT_WIDTH:
             ratio = PRINT_WIDTH / img.width
             new_height = int(img.height * ratio)
@@ -224,17 +228,8 @@ class PaperangP2:
         # 转为位图数据 (参考 Java 项目的 toByteArrays())
         # 按行打包: 每行 72 字节，每个字节的 8 位代表 8 个水平像素
         # bitPos = 7 - (x % 8), 即 MSB 在左
-        img_width = img.width
-        height = img.height
         width_bytes = PRINT_WIDTH // 8  # 72
-        
-        # 调整图像宽度为 576 像素
-        if img_width != PRINT_WIDTH:
-            ratio = PRINT_WIDTH / img_width
-            new_height = int(height * ratio)
-            img = img.resize((PRINT_WIDTH, new_height), Image.LANCZOS)
-            img = img.convert('L').point(lambda x: 0 if x < 128 else 255, '1')
-            height = img.height
+        height = img.height
         
         # 按行打包数据
         data = bytearray()
@@ -282,13 +277,14 @@ class PaperangP2:
         for line in lines:
             bbox = font.getbbox(line)
             w = bbox[2] - bbox[0] if bbox else len(line) * font_size // 2
-            h = bbox[3] - bbox[1] if bbox else font_size
+            # 使用 bbox[3] 作为高度（包含基线下方的空间）
+            h = bbox[3] if bbox else font_size
             max_width = max(max_width, w)
             line_heights.append(h + 4)
             total_height += h + 4
         
-        # 创建图像 (高度必须是 8 的倍数，因为打印机按 8 行一组处理)
-        img_width = min(max_width + 20, PRINT_WIDTH)
+        # 创建图像 (宽度必须是 576，高度必须是 8 的倍数)
+        img_width = PRINT_WIDTH  # 576
         img_height = ((total_height + 20 + 7) // 8) * 8  # 向上取整到 8 的倍数
         img = Image.new('1', (img_width, img_height), 1)
         draw = ImageDraw.Draw(img)
