@@ -201,7 +201,7 @@ class PaperangP2:
         
         return True
     
-    def print_image(self, image_path, heat_density=75, feed_before=50, feed_after=300):
+    def print_image(self, image_path, heat_density=75, feed_before=50, feed_after=300, threshold=128, brightness=1.0, contrast=1.0):
         """
         Print image file
         
@@ -210,6 +210,9 @@ class PaperangP2:
             heat_density: Heat density 0-100 (default 75)
             feed_before: Paper feed before printing (default 50)
             feed_after: Paper feed after printing (default 300)
+            threshold: Binarization threshold 0-255 (default 128, higher = less black)
+            brightness: Brightness multiplier (default 1.0, <1 = darker, >1 = brighter)
+            contrast: Contrast multiplier (default 1.0, <1 = less contrast, >1 = more contrast)
         """
         # Open image
         img = Image.open(image_path)
@@ -223,7 +226,9 @@ class PaperangP2:
         # Convert to grayscale then binarize (if not already 1-bit)
         if img.mode != '1':
             img = img.convert('L')
-            img = img.point(lambda x: 0 if x < 128 else 255, '1')
+            # Apply brightness and contrast adjustments
+            img = img.point(lambda x: max(0, min(255, int((x - 128) * contrast + 128 * brightness))))
+            img = img.point(lambda x: 0 if x < threshold else 255, '1')
         
         # Convert to bitmap data (based on Java project's toByteArrays())
         # Row-based packing: 72 bytes per line, each byte's 8 bits represent 8 horizontal pixels
@@ -419,6 +424,9 @@ def main():
     parser = argparse.ArgumentParser(description='Paperang P2 Printer Control')
     parser.add_argument('-t', '--text', help='Print text')
     parser.add_argument('-i', '--image', help='Print image')
+    parser.add_argument('--threshold', type=int, default=180, help='Binarization threshold 0-255 (default 180, higher = less black)')
+    parser.add_argument('--brightness', type=float, default=1.5, help='Brightness multiplier (default 1.5, <1 = darker, >1 = brighter)')
+    parser.add_argument('--contrast', type=float, default=0.6, help='Contrast multiplier (default 0.6, <1 = less contrast, >1 = more contrast)')
     parser.add_argument('-q', '--qr', help='Print QR code')
     parser.add_argument('-f', '--font-size', type=int, default=24, help='Font size')
     parser.add_argument('-d', '--density', type=int, default=75, help='Heat density 0-100 (default 75)')
@@ -450,7 +458,7 @@ def main():
         elif args.text:
             printer.print_text(args.text, font_size=args.font_size, heat_density=args.density)
         elif args.image:
-            printer.print_image(args.image, heat_density=args.density)
+            printer.print_image(args.image, heat_density=args.density, threshold=args.threshold, brightness=args.brightness, contrast=args.contrast)
         elif args.qr:
             printer.print_qr(args.qr, heat_density=args.density)
         else:
