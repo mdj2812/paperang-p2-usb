@@ -149,23 +149,59 @@ class PaperangP2:
         """Print test page"""
         return self.send(0x1B)
     
+    def read_response(self, timeout=1000):
+        """Read and parse response from printer"""
+        try:
+            resp = self.dev.read(self.ep_in.bEndpointAddress, 64, timeout=timeout)
+            # Parse response packet
+            # Format: [0x02] [CMD:1B] [packetRemain:1B] [dataLength:2B LE] [DATA] [CRC32:4B LE] [0x03]
+            if len(resp) < 10:
+                return None
+            
+            # Find start byte
+            start_idx = 0
+            for i in range(len(resp)):
+                if resp[i] == 0x02:
+                    start_idx = i
+                    break
+            
+            if start_idx + 10 > len(resp):
+                return None
+            
+            cmd = resp[start_idx + 1]
+            packet_remain = resp[start_idx + 2]
+            data_len = struct.unpack('<H', resp[start_idx + 3:start_idx + 5])[0]
+            
+            if start_idx + 5 + data_len + 4 + 1 > len(resp):
+                return None
+            
+            data = bytes(resp[start_idx + 5:start_idx + 5 + data_len])
+            crc = struct.unpack('<I', resp[start_idx + 5 + data_len:start_idx + 5 + data_len + 4])[0]
+            end_byte = resp[start_idx + 5 + data_len + 4]
+            
+            if end_byte != 0x03:
+                return None
+            
+            return {'cmd': cmd, 'packet_remain': packet_remain, 'data': data, 'crc': crc}
+        except Exception as e:
+            return None
+    
     def get_status(self):
         """Get printer status"""
         self.send(0x0C)
-        try:
-            resp = self.dev.read(self.ep_in.bEndpointAddress, 64, timeout=1000)
-            return resp
-        except:
-            return None
+        resp = self.read_response()
+        if resp:
+            return resp['data'].hex() if resp['data'] else None
+        return None
     
     def get_battery(self):
         """Get battery level"""
         self.send(0x10)
-        try:
-            resp = self.dev.read(self.ep_in.bEndpointAddress, 64, timeout=1000)
-            return resp
-        except:
-            return None
+        resp = self.read_response()
+        if resp and resp['data']:
+            # Battery level is typically in the first byte
+            return resp['data'][0] if len(resp['data']) > 0 else None
+        return None
     
     def print_bitmap(self, bitmap_data, width_bytes=72):
         """Print bitmap data (row-based packet splitting, based on Java project)"""
