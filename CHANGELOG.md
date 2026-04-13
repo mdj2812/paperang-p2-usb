@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.1.0 (2026-04-14)
+
+### Features
+
+- **MQTT Print Client**: Home Assistant integration via MQTT
+  - Subscribe to `paperang/print/text` for text printing
+  - Subscribe to `paperang/print/image` for image printing
+  - Subscribe to `paperang/print/qr` for QR code printing
+  - JSON payload support with configurable parameters
+  - Systemd service for auto-start
+
+### Added
+
+- `mqtt_print.py`: MQTT client for remote printing
+- Systemd service configuration for mqtt-print.service
+
 ## v1.0.0 (2026-04-12)
 
 ### Features
