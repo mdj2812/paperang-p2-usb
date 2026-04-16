@@ -477,6 +477,48 @@ class PaperangP2:
         self.feed(300)
         return True
 
+    def print_pickup_code(self, code, heat_density=100):
+        """
+        Print a pickup code in large bold style (e.g. "19-4308")
+        Font: 96px, centered, max density for bold effect
+        """
+        # Load largest available CJK font
+        font_paths = [
+            '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+            '/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf',
+            '/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc',
+            '/usr/share/fonts/truetype/wqy/wqy-microhei.ttc',
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+        ]
+        font = None
+        for fp in font_paths:
+            if os.path.exists(fp):
+                font = ImageFont.truetype(fp, 96)
+                break
+        if font is None:
+            font = ImageFont.load_default()
+
+        # Render text to measure size
+        bbox = font.getbbox(code)
+        text_width = bbox[2] - bbox[0] if bbox else 400
+        text_height = bbox[3] - bbox[0] if bbox else 120
+
+        # Canvas: 576 wide, height enough for code + padding
+        canvas_width = PRINT_WIDTH
+        canvas_height = ((text_height + 60 + 7) // 8) * 8
+        canvas = Image.new('1', (canvas_width, canvas_height), 1)
+        draw = ImageDraw.Draw(canvas)
+
+        # Center the text
+        x = (canvas_width - text_width) // 2
+        y = 20
+        draw.text((x, y), code, font=font, fill=0)
+
+        tmp_path = '/tmp/paperang_pickup_code.png'
+        canvas.save(tmp_path)
+        return self.print_image(tmp_path, heat_density=heat_density, feed_before=50, feed_after=200)
+
 
 def load_profiles():
     """Load print profiles from JSON file"""
@@ -517,6 +559,7 @@ def main():
     parser.add_argument('--status', action='store_true', help='Get printer status')
     parser.add_argument('--battery', action='store_true', help='Get battery level')
     parser.add_argument('--list-profiles', action='store_true', help='List available profiles')
+    parser.add_argument('--pickup-code', help='Print a pickup code in large bold style (e.g. "19-4308")')
     
     args = parser.parse_args()
     
@@ -558,6 +601,8 @@ def main():
             printer.print_image(args.image, heat_density=heat_density, threshold=threshold, brightness=brightness, contrast=contrast)
         elif args.qr:
             printer.print_qr(args.qr, heat_density=heat_density, max_width=args.qr_size)
+        elif args.pickup_code:
+            printer.print_pickup_code(args.pickup_code, heat_density=heat_density)
         else:
             # Default test text
             test_text = """Paperang P2 Test Print
