@@ -9,6 +9,7 @@ Based on [hurui200320/java-paperang-p2-usb](https://github.com/hurui200320/java-
 - **Text Printing** - CJK font support (Chinese, Japanese, Korean) with adjustable size
 - **Image Printing** - Adjustable threshold, brightness, and contrast
 - **QR Code Printing** - Auto-sized to fill paper width
+- **Pickup Code Printing** - Large bold centered codes (e.g. "19-4308")
 - **Print Profiles** - Pre-configured settings for portraits, landscapes, documents
 - **MQTT Integration** - Remote printing via Home Assistant or any MQTT client
 - **Status Reading** - Battery level and printer status
@@ -60,6 +61,24 @@ sudo python3 paperang_p2.py -i photo.jpg -p portrait
 # With custom parameters
 sudo python3 paperang_p2.py -i photo.jpg --threshold 180 --brightness 1.5 --contrast 0.6
 ```
+
+### Print Pickup Code
+
+Large bold centered text, perfect for printing pickup codes on receipts:
+
+```bash
+# Basic pickup code (96px, max density, centered)
+sudo python3 paperang_p2.py --pickup-code "19-4308"
+
+# Custom code with any format
+sudo python3 paperang_p2.py --pickup-code "A-1234"
+```
+
+Features:
+- 96px font size for maximum readability
+- Auto-centered on paper
+- Maximum heat density (100%) for bold, clear text
+- Perfect for courier/parcel pickup codes
 
 ### Print QR Code
 
