@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.2.0 (2026-05-07)
+
+### Features
+
+- **Pickup Code Printing**: Print large bold pickup codes (e.g., for package lockers)
+  - `--pickup-code "19-4308"` format support (rack-position pattern)
+  - 96px ultra-large font, centered on paper
+  - Max density printing for clarity
+  - Automatic formatting with separator line
+
 ## v1.1.0 (2026-04-14)
 
 ### Features
