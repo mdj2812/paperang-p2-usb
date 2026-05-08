@@ -5,8 +5,6 @@ Subscribes to MQTT topics and prints messages
 """
 
 import json
-import sys
-import os
 import argparse
 import paho.mqtt.client as mqtt
 from paperang import PaperangP2
