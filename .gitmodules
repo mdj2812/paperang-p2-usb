@@ -1,3 +1,3 @@
 [submodule "paperang-p2-lib"]
 	path = paperang-p2-lib
-	url = git@192.168.99.20:openclaw/paperang-p2-lib.git
+	url = https://github.com/mdj2812/paperang-p2-lib.git
