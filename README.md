@@ -1,6 +1,6 @@
 # Paperang P2 USB Printer
 
-Control Paperang P2 thermal printer via USB on Linux systems, with Home Assistant integration via MQTT.
+Control Paperang P2 thermal printer via USB on Linux systems.
 
 Core logic powered by [paperang-p2-lib](https://github.com/mdj2812/paperang-p2-lib).
 
@@ -13,7 +13,6 @@ Based on [hurui200320/java-paperang-p2-usb](https://github.com/hurui200320/java-
 - **QR Code Printing** - Auto-sized to fill paper width
 - **Pickup Code Printing** - Large bold centered codes (e.g. "19-4308")
 - **Print Profiles** - Pre-configured settings for portraits, landscapes, documents
-- **MQTT Integration** - Remote printing via Home Assistant or any MQTT client
 - **Status Reading** - Battery level and printer status
 
 ## Project Structure
@@ -59,7 +58,7 @@ python3 paperang_p2.py -t "Hello World"
 # Custom font size and density
 python3 paperang_p2.py -t "Dark text" -f 48 -d 100
 
-# Chinese/Japanese/Korean text (requires paperang-p2-lib[cjk])
+# Chinese/Japanese/Korean text
 python3 paperang_p2.py -t "一二三 ABC" -f 48
 ```
 
@@ -134,46 +133,6 @@ Pre-configured settings optimized for different content types:
 | `light` | 200 | 1.3 | 0.5 | 45 | Saving paper/ink |
 
 View all profiles: `python3 paperang_p2.py --list-profiles`
-
-## MQTT Integration
-
-Control the printer remotely via MQTT, perfect for Home Assistant integration.
-
-### Setup
-
-```bash
-# Start MQTT print service
-sudo systemctl start mqtt-print
-sudo systemctl enable mqtt-print  # Auto-start on boot
-```
-
-### Publishing Print Jobs
-
-```bash
-# Print text
-mosquitto_pub -h 192.168.99.6 -t 'paperang/print/text' \
-  -m '{"content": "Hello from MQTT", "font_size": 24}'
-
-# Print image
-mosquitto_pub -h 192.168.99.6 -t 'paperang/print/image' \
-  -m '{"url": "http://example.com/photo.jpg", "profile": "portrait"}'
-
-# Print QR code
-mosquitto_pub -h 192.168.99.6 -t 'paperang/print/qr' \
-  -m '{"content": "https://example.com"}'
-```
-
-### Home Assistant
-
-1. Add MQTT integration pointing to `192.168.99.6:1883`
-2. Use `mqtt.publish` service in automations:
-
-```yaml
-action: mqtt.publish
-data:
-  topic: paperang/print/text
-  payload: '{"content": "Good Morning!", "font_size": 32}'
-```
 
 ## Python API
 
