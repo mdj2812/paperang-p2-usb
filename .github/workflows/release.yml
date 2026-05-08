@@ -31,7 +31,19 @@ jobs:
           python3 -m pip install ruff
           ruff check *.py examples/
 
+      - name: Package release assets
+        run: |
+          mkdir -p dist/paperang-p2-usb/examples
+          cp paperang_p2.py profiles.json requirements.txt README.md LICENSE dist/paperang-p2-usb/
+          cp examples/*.py examples/*.md dist/paperang-p2-usb/examples/
+          cd dist
+          tar czf paperang-p2-usb.tar.gz paperang-p2-usb/
+          zip -qr paperang-p2-usb.zip paperang-p2-usb/
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
+          files: |
+            dist/paperang-p2-usb.tar.gz
+            dist/paperang-p2-usb.zip
