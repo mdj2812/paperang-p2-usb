@@ -176,7 +176,7 @@ data:
 
 ## Python API
 
-> For the full API reference, see [paperang-p2-lib](https://github.com/mdj2812/paperang-p2-lib).
+> For the full API and protocol details, see [paperang-p2-lib](https://github.com/mdj2812/paperang-p2-lib).
 
 This repo re-exports `PaperangP2` from `paperang_p2` for convenience:
 
@@ -200,37 +200,6 @@ printer.set_heat_density(75)
 printer.feed(100)
 printer.set_paper_type(0)
 ```
-
-## Protocol Details
-
-See [paperang-p2-lib](https://github.com/mdj2812/paperang-p2-lib) for the full implementation.
-
-- **Vendor ID:** 0x4348
-- **Product ID:** 0x5584
-- **Print width:** 576 pixels (72 bytes/line)
-- **Packet size:** 14 lines per packet (1008 bytes)
-
-### Packet Format
-
-```
-[0x02] [CMD:1B] [packetRemain:1B] [dataLength:2B LE] [DATA:0-1023B] [CRC32:4B LE] [0x03]
-```
-
-### Key Commands
-
-| Command | Description |
-|---------|-------------|
-| 0x00 | Print bitmap data |
-| 0x0C | Get status |
-| 0x10 | Get battery level |
-| 0x19 | Set heat density (0-100) |
-| 0x1A | Feed paper |
-| 0x1B | Print test page |
-| 0x2C | Set paper type |
-
-### CRC32
-
-Custom seed `0x35769521` (standard CRC32 uses `0x00000000`).
 
 ## Troubleshooting
 
