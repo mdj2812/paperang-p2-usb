@@ -2,6 +2,8 @@
 
 Control Paperang P2 thermal printer via USB on Linux systems, with Home Assistant integration via MQTT.
 
+Core logic powered by [paperang-p2-lib](https://github.com/mdj2812/paperang-p2-lib).
+
 Based on [hurui200320/java-paperang-p2-usb](https://github.com/hurui200320/java-paperang-p2-usb) protocol implementation.
 
 ## Features
@@ -13,6 +15,14 @@ Based on [hurui200320/java-paperang-p2-usb](https://github.com/hurui200320/java-
 - **Print Profiles** - Pre-configured settings for portraits, landscapes, documents
 - **MQTT Integration** - Remote printing via Home Assistant or any MQTT client
 - **Status Reading** - Battery level and printer status
+
+## Project Structure
+
+This repo contains:
+- **CLI** (`paperang_p2.py`) — command-line interface for direct printing
+- **MQTT Client** (`mqtt_print.py`) — MQTT print service for remote printing
+
+Core logic (USB protocol, print functions, fonts, profiles) lives in the [paperang-p2-lib](https://github.com/mdj2812/paperang-p2-lib) submodule.
 
 ## Quick Start
 
@@ -166,6 +176,10 @@ data:
 
 ## Python API
 
+> For the full API reference, see [paperang-p2-lib](https://github.com/mdj2812/paperang-p2-lib).
+
+This repo re-exports `PaperangP2` from `paperang_p2` for convenience:
+
 ```python
 from paperang_p2 import PaperangP2
 
@@ -188,6 +202,8 @@ printer.set_paper_type(0)
 ```
 
 ## Protocol Details
+
+See [paperang-p2-lib](https://github.com/mdj2812/paperang-p2-lib) for the full implementation.
 
 - **Vendor ID:** 0x4348
 - **Product ID:** 0x5584
