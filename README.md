@@ -26,23 +26,9 @@ Core logic (USB protocol, print functions, fonts, profiles) lives in [paperang-p
 
 ## Installation
 
-### Quick install
-
-```bash
-pip3 install paperang-p2-usb
-```
-
-### From source
-
 ```bash
 git clone https://github.com/mdj2812/paperang-p2-usb.git
 cd paperang-p2-usb
-pip3 install -e .
-```
-
-### Or with requirements.txt
-
-```bash
 pip3 install -r requirements.txt
 ```
 
@@ -50,19 +36,16 @@ pip3 install -r requirements.txt
 
 ```bash
 # Print text
-paperang-p2 -t "Hello World"
-
-# Or directly
 python3 paperang_p2.py -t "Hello World"
 
 # Print image with profile
-paperang-p2 -i photo.jpg -p portrait
+python3 paperang_p2.py -i photo.jpg -p portrait
 
 # Print QR code
-paperang-p2 -q "https://example.com"
+python3 paperang_p2.py -q "https://example.com"
 
 # List available profiles
-paperang-p2 --list-profiles
+python3 paperang_p2.py --list-profiles
 ```
 
 ## Command Line Usage
@@ -71,26 +54,26 @@ paperang-p2 --list-profiles
 
 ```bash
 # Basic text
-paperang-p2 -t "Hello World"
+python3 paperang_p2.py -t "Hello World"
 
 # Custom font size and density
-paperang-p2 -t "Dark text" -f 48 -d 100
+python3 paperang_p2.py -t "Dark text" -f 48 -d 100
 
 # Chinese/Japanese/Korean text (requires paperang-p2-lib[cjk])
-paperang-p2 -t "一二三 ABC" -f 48
+python3 paperang_p2.py -t "一二三 ABC" -f 48
 ```
 
 ### Print Image
 
 ```bash
 # With default settings
-paperang-p2 -i photo.jpg
+python3 paperang_p2.py -i photo.jpg
 
 # With profile
-paperang-p2 -i photo.jpg -p portrait
+python3 paperang_p2.py -i photo.jpg -p portrait
 
 # With custom parameters
-paperang-p2 -i photo.jpg --threshold 180 --brightness 1.5 --contrast 0.6
+python3 paperang_p2.py -i photo.jpg --threshold 180 --brightness 1.5 --contrast 0.6
 ```
 
 ### Print Pickup Code
@@ -99,10 +82,10 @@ Large bold centered text, perfect for printing pickup codes on receipts:
 
 ```bash
 # Basic pickup code (96px, max density, centered)
-paperang-p2 --pickup-code "19-4308"
+python3 paperang_p2.py --pickup-code "19-4308"
 
 # Custom code with any format
-paperang-p2 --pickup-code "A-1234"
+python3 paperang_p2.py --pickup-code "A-1234"
 ```
 
 Features:
@@ -115,27 +98,27 @@ Features:
 
 ```bash
 # Basic QR code (auto-sized)
-paperang-p2 -q "https://example.com"
+python3 paperang_p2.py -q "https://example.com"
 
 # Custom size
-paperang-p2 -q "https://example.com" --qr-size 400
+python3 paperang_p2.py -q "https://example.com" --qr-size 400
 ```
 
 ### Test Functions
 
 ```bash
 # Print test page
-paperang-p2 --test
+python3 paperang_p2.py --test
 
 # Pattern test (lines, columns, multi-packet)
-paperang-p2 --pattern-test
+python3 paperang_p2.py --pattern-test
 
 # Heat density test
-paperang-p2 --density-test
+python3 paperang_p2.py --density-test
 
 # Get status/battery
-paperang-p2 --status
-paperang-p2 --battery
+python3 paperang_p2.py --status
+python3 paperang_p2.py --battery
 ```
 
 ## Print Profiles
@@ -150,7 +133,7 @@ Pre-configured settings optimized for different content types:
 | `high_contrast` | 100 | 1.0 | 1.2 | 85 | Bold/high-contrast images |
 | `light` | 200 | 1.3 | 0.5 | 45 | Saving paper/ink |
 
-View all profiles: `paperang-p2 --list-profiles`
+View all profiles: `python3 paperang_p2.py --list-profiles`
 
 ## MQTT Integration
 
