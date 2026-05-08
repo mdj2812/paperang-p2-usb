@@ -10,7 +10,7 @@ readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.8"
 dependencies = [
-    "paperang-p2-lib>=0.2.0",
+    "paperang-p2-lib[qr,cjk]>=0.2.0",
 ]
 
 [tool.setuptools]
