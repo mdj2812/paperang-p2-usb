@@ -9,7 +9,7 @@ import sys
 import os
 import argparse
 import paho.mqtt.client as mqtt
-from paperang_p2 import PaperangP2
+from paperang import PaperangP2
 
 # MQTT Configuration
 MQTT_BROKER = "192.168.99.6"

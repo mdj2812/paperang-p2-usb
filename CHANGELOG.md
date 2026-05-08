@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.3.0 (2026-05-08)
+
+### Changed
+- **Removed git submodule**: paperang-p2-lib is now installed via pip dependency
+- Added `pyproject.toml` for pip-installable packaging (`pip install paperang-p2-usb`)
+- Added `paperang-p2` CLI entry point (`paperang-p2 -t "Hello"`)
+- Updated imports to use `from paperang import PaperangP2` directly
+- Simplified installation: `pip install paperang-p2-lib>=0.2.0` handles all dependencies
+
 ## v1.2.0 (2026-05-07)
 
 ### Features

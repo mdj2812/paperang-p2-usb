@@ -1,3 +1,2 @@
-pyusb>=1.2.1
-Pillow>=9.0.0
-qrcode[pil]>=7.0
+paperang-p2-lib>=0.2.0
+paho-mqtt>=2.0.0

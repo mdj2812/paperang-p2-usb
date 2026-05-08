@@ -8,11 +8,6 @@ import sys
 import os
 import argparse
 
-# Add paperang-p2-lib (submodule) to sys.path
-_lib_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'paperang-p2-lib', 'src')
-if os.path.isdir(_lib_dir) and _lib_dir not in sys.path:
-    sys.path.insert(0, _lib_dir)
-
 from paperang import PaperangP2, load_profiles, list_profiles
 
 

@@ -22,26 +22,47 @@ This repo contains:
 - **CLI** (`paperang_p2.py`) — command-line interface for direct printing
 - **MQTT Client** (`mqtt_print.py`) — MQTT print service for remote printing
 
-Core logic (USB protocol, print functions, fonts, profiles) lives in the [paperang-p2-lib](https://github.com/mdj2812/paperang-p2-lib) submodule.
+Core logic (USB protocol, print functions, fonts, profiles) lives in [paperang-p2-lib](https://github.com/mdj2812/paperang-p2-lib) (installed via pip).
+
+## Installation
+
+### Quick install
+
+```bash
+pip3 install paperang-p2-usb
+```
+
+### From source
+
+```bash
+git clone https://github.com/mdj2812/paperang-p2-usb.git
+cd paperang-p2-usb
+pip3 install -e .
+```
+
+### Or with requirements.txt
+
+```bash
+pip3 install -r requirements.txt
+```
 
 ## Quick Start
 
 ```bash
-# Install dependencies
-sudo apt-get install python3-usb python3-pil python3-qrcode
-pip3 install pyusb pillow qrcode[pil]
-
 # Print text
-sudo python3 paperang_p2.py -t "Hello World"
+paperang-p2 -t "Hello World"
+
+# Or directly
+python3 paperang_p2.py -t "Hello World"
 
 # Print image with profile
-sudo python3 paperang_p2.py -i photo.jpg -p portrait
+paperang-p2 -i photo.jpg -p portrait
 
 # Print QR code
-sudo python3 paperang_p2.py -q "https://example.com"
+paperang-p2 -q "https://example.com"
 
 # List available profiles
-python3 paperang_p2.py --list-profiles
+paperang-p2 --list-profiles
 ```
 
 ## Command Line Usage
@@ -50,26 +71,26 @@ python3 paperang_p2.py --list-profiles
 
 ```bash
 # Basic text
-sudo python3 paperang_p2.py -t "Hello World"
+paperang-p2 -t "Hello World"
 
 # Custom font size and density
-sudo python3 paperang_p2.py -t "Dark text" -f 48 -d 100
+paperang-p2 -t "Dark text" -f 48 -d 100
 
-# Chinese/Japanese/Korean text
-sudo python3 paperang_p2.py -t "一二三 ABC" -f 48
+# Chinese/Japanese/Korean text (requires paperang-p2-lib[cjk])
+paperang-p2 -t "一二三 ABC" -f 48
 ```
 
 ### Print Image
 
 ```bash
 # With default settings
-sudo python3 paperang_p2.py -i photo.jpg
+paperang-p2 -i photo.jpg
 
 # With profile
-sudo python3 paperang_p2.py -i photo.jpg -p portrait
+paperang-p2 -i photo.jpg -p portrait
 
 # With custom parameters
-sudo python3 paperang_p2.py -i photo.jpg --threshold 180 --brightness 1.5 --contrast 0.6
+paperang-p2 -i photo.jpg --threshold 180 --brightness 1.5 --contrast 0.6
 ```
 
 ### Print Pickup Code
@@ -78,10 +99,10 @@ Large bold centered text, perfect for printing pickup codes on receipts:
 
 ```bash
 # Basic pickup code (96px, max density, centered)
-sudo python3 paperang_p2.py --pickup-code "19-4308"
+paperang-p2 --pickup-code "19-4308"
 
 # Custom code with any format
-sudo python3 paperang_p2.py --pickup-code "A-1234"
+paperang-p2 --pickup-code "A-1234"
 ```
 
 Features:
@@ -94,27 +115,27 @@ Features:
 
 ```bash
 # Basic QR code (auto-sized)
-sudo python3 paperang_p2.py -q "https://example.com"
+paperang-p2 -q "https://example.com"
 
 # Custom size
-sudo python3 paperang_p2.py -q "https://example.com" --qr-size 400
+paperang-p2 -q "https://example.com" --qr-size 400
 ```
 
 ### Test Functions
 
 ```bash
 # Print test page
-sudo python3 paperang_p2.py --test
+paperang-p2 --test
 
 # Pattern test (lines, columns, multi-packet)
-sudo python3 paperang_p2.py --pattern-test
+paperang-p2 --pattern-test
 
 # Heat density test
-sudo python3 paperang_p2.py --density-test
+paperang-p2 --density-test
 
 # Get status/battery
-sudo python3 paperang_p2.py --status
-sudo python3 paperang_p2.py --battery
+paperang-p2 --status
+paperang-p2 --battery
 ```
 
 ## Print Profiles
@@ -129,7 +150,7 @@ Pre-configured settings optimized for different content types:
 | `high_contrast` | 100 | 1.0 | 1.2 | 85 | Bold/high-contrast images |
 | `light` | 200 | 1.3 | 0.5 | 45 | Saving paper/ink |
 
-View all profiles: `python3 paperang_p2.py --list-profiles`
+View all profiles: `paperang-p2 --list-profiles`
 
 ## MQTT Integration
 
@@ -138,9 +159,6 @@ Control the printer remotely via MQTT, perfect for Home Assistant integration.
 ### Setup
 
 ```bash
-# Install MQTT client library
-sudo pip3 install paho-mqtt
-
 # Start MQTT print service
 sudo systemctl start mqtt-print
 sudo systemctl enable mqtt-print  # Auto-start on boot
@@ -178,10 +196,8 @@ data:
 
 > For the full API and protocol details, see [paperang-p2-lib](https://github.com/mdj2812/paperang-p2-lib).
 
-This repo re-exports `PaperangP2` from `paperang_p2` for convenience:
-
 ```python
-from paperang_p2 import PaperangP2
+from paperang import PaperangP2
 
 printer = PaperangP2()
 printer.connect()
