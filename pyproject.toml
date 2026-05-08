@@ -11,8 +11,7 @@ license = {file = "LICENSE"}
 requires-python = ">=3.8"
 dependencies = [
     "paperang-p2-lib>=0.2.0",
-    "paho-mqtt>=2.0.0",
 ]
 
 [tool.setuptools]
-py-modules = ["paperang_p2", "mqtt_print"]
+py-modules = ["paperang_p2"]

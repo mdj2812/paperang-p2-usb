@@ -4,8 +4,10 @@
 
 ### Changed
 - **Removed git submodule**: paperang-p2-lib is now installed via pip dependency
-- Added `pyproject.toml` for dependency management (`pip install -r requirements.txt`)
+- Added `pyproject.toml` for dependency management
 - Updated imports to use `from paperang import PaperangP2` directly
+- Moved `mqtt_print.py` to `examples/` directory as an integration example
+- Removed `.gitmodules` (no longer needed)
 - Simplified installation: `pip install paperang-p2-lib>=0.2.0` handles all dependencies
 
 ## v1.2.0 (2026-05-07)

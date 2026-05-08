@@ -20,7 +20,7 @@ Based on [hurui200320/java-paperang-p2-usb](https://github.com/hurui200320/java-
 
 This repo contains:
 - **CLI** (`paperang_p2.py`) — command-line interface for direct printing
-- **MQTT Client** (`mqtt_print.py`) — MQTT print service for remote printing
+- **[examples/](examples/)** — Example integrations (MQTT print service etc.)
 
 Core logic (USB protocol, print functions, fonts, profiles) lives in [paperang-p2-lib](https://github.com/mdj2812/paperang-p2-lib) (installed via pip).
 
