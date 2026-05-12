@@ -21,7 +21,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: python3 -m pip install -r requirements.txt
+        run: python3 -m pip install .
 
       - name: Verify import
         run: python3 -c "from paperang import PaperangP2; print('Import OK')"
@@ -34,7 +34,7 @@ jobs:
       - name: Package release assets
         run: |
           mkdir -p dist/paperang-p2-usb
-          cp paperang_p2.py profiles.json requirements.txt README.md LICENSE dist/paperang-p2-usb/
+          cp paperang_p2.py profiles.json pyproject.toml README.md LICENSE dist/paperang-p2-usb/
           cd dist
           tar czf paperang-p2-usb.tar.gz paperang-p2-usb/
           zip -qr paperang-p2-usb.zip paperang-p2-usb/
