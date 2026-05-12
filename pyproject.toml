@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "paperang-p2-usb"
-version = "1.4.0"
+version = "1.4.1"
 description = "CLI + MQTT wrapper for Paperang P2 thermal printer"
 readme = "README.md"
 license = {file = "LICENSE"}
