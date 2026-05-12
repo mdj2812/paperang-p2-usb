@@ -7,6 +7,7 @@ Thin wrapper around paperang-p2-lib.
 import sys
 import os
 import argparse
+from datetime import datetime
 
 from paperang import PaperangP2, load_profiles, list_profiles
 
@@ -14,83 +15,258 @@ from paperang import PaperangP2, load_profiles, list_profiles
 PROFILES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'profiles.json')
 
 
+# ── helpers ─────────────────────────────────────────────────────
+
+def _add_profile_args(parser):
+    parser.add_argument('--profile', help='Image profile')
+    parser.add_argument('--density', type=int, help='Heat density 0-100')
+
+
+def _add_image_args(parser):
+    parser.add_argument('--threshold', type=int, help='Binarization threshold')
+    parser.add_argument('--brightness', type=float, help='Brightness multiplier')
+    parser.add_argument('--contrast', type=float, help='Contrast multiplier')
+
+
+def _resolve(profiles, profile, args):
+    """Resolve print parameters: CLI args override profile defaults."""
+    ps = profiles.get(profile, {}) if profile else {}
+    return {
+        'heat_density': args.density if args.density is not None
+                        else ps.get('heat_density', 75),
+        'threshold': getattr(args, 'threshold', None) or ps.get('threshold', 128),
+        'brightness': getattr(args, 'brightness', None) or ps.get('brightness', 1.0),
+        'contrast': getattr(args, 'contrast', None) or ps.get('contrast', 1.0),
+    }
+
+
+def _connect():
+    p = PaperangP2()
+    p.connect()
+    return p
+
+
+# ── info handlers ───────────────────────────────────────────────
+
+_INFO_FIELDS = [
+    ("battery",     "Battery",          lambda p: p.get_battery()),
+    ("status",      "Status",           lambda p: p.get_status()),
+    ("voltage",     "Voltage",          lambda p: p.get_voltage()),
+    ("temperature", "Temperature",      lambda p: p.get_temperature()),
+    ("heat",        "Heat Density",     lambda p: p.get_heat_density()),
+    ("paper",       "Paper Type",       lambda p: p.get_paper_type()),
+    ("version",     "Firmware Version", lambda p: p.get_version()),
+    ("model",       "Model",            lambda p: p.get_model()),
+    ("serial",      "Serial Number",    lambda p: p.get_sn()),
+    ("board",       "Board Version",    lambda p: p.get_board_version()),
+    ("hw",          "Hardware Info",    lambda p: p.get_hw_info()),
+    ("mac",         "Bluetooth MAC",    lambda p: p.get_bt_mac()),
+    ("country",     "Country",          lambda p: p.get_country()),
+    ("max_gap",     "Max Gap",          lambda p: p.get_max_gap()),
+    ("power_down",  "Power Down Time",  lambda p: p.get_power_down_time()),
+    ("factory",     "Factory Status",   lambda p: p.get_factory_status()),
+]
+
+_INFO_MAP = {k: (label, fn) for k, label, fn in _INFO_FIELDS}
+
+
+def cmd_info(args):
+    p = _connect()
+    try:
+        if args.field == "all":
+            print("Paperang P2 Telemetry")
+            print("=" * 30)
+            for key, label, fn in _INFO_FIELDS:
+                val = fn(p)
+                print(f"  {label:.<20} {val}")
+        else:
+            label, fn = _INFO_MAP[args.field]
+            val = fn(p)
+            print(f"{label}: {val}")
+    finally:
+        if p.dev:
+            import usb.util
+            usb.util.dispose_resources(p.dev)
+
+
+# ── print handlers ──────────────────────────────────────────────
+
+def cmd_print_text(args):
+    profiles = load_profiles(PROFILES_PATH)
+    params = _resolve(profiles, args.profile, args)
+    p = _connect()
+    try:
+        p.print_text(
+            args.content, font_size=args.font_size,
+            heat_density=params['heat_density'])
+    finally:
+        if p.dev:
+            import usb.util
+            usb.util.dispose_resources(p.dev)
+
+
+def cmd_print_image(args):
+    profiles = load_profiles(PROFILES_PATH)
+    params = _resolve(profiles, args.profile, args)
+    p = _connect()
+    try:
+        p.print_image(
+            args.path, heat_density=params['heat_density'],
+            threshold=params['threshold'], brightness=params['brightness'],
+            contrast=params['contrast'])
+    finally:
+        if p.dev:
+            import usb.util
+            usb.util.dispose_resources(p.dev)
+
+
+def cmd_print_qr(args):
+    profiles = load_profiles(PROFILES_PATH)
+    params = _resolve(profiles, args.profile, args)
+    p = _connect()
+    try:
+        p.print_qr(
+            args.content, heat_density=params['heat_density'],
+            max_width=args.qr_size)
+    finally:
+        if p.dev:
+            import usb.util
+            usb.util.dispose_resources(p.dev)
+
+
+def cmd_print_pickup(args):
+    profiles = load_profiles(PROFILES_PATH)
+    params = _resolve(profiles, args.profile, args)
+    p = _connect()
+    try:
+        p.print_pickup_code(args.code, heat_density=params['heat_density'])
+    finally:
+        if p.dev:
+            import usb.util
+            usb.util.dispose_resources(p.dev)
+
+
+def cmd_print_test(args):
+    profiles = load_profiles(PROFILES_PATH)
+    params = _resolve(profiles, args.profile, args)
+    p = _connect()
+    try:
+        p.print_test_page()
+    finally:
+        if p.dev:
+            import usb.util
+            usb.util.dispose_resources(p.dev)
+
+
+def cmd_print_pattern(args):
+    p = _connect()
+    try:
+        p.print_pattern_test()
+    finally:
+        if p.dev:
+            import usb.util
+            usb.util.dispose_resources(p.dev)
+
+
+def cmd_print_density(args):
+    p = _connect()
+    try:
+        p.print_heat_density_test()
+    finally:
+        if p.dev:
+            import usb.util
+            usb.util.dispose_resources(p.dev)
+
+
+def cmd_feed(args):
+    p = _connect()
+    try:
+        p.feed(args.lines)
+    finally:
+        if p.dev:
+            import usb.util
+            usb.util.dispose_resources(p.dev)
+
+
+def cmd_profile_list(args):
+    list_profiles(PROFILES_PATH)
+
+
+# ── main ────────────────────────────────────────────────────────
+
 def main():
-    parser = argparse.ArgumentParser(description='Paperang P2 Printer Control')
-    parser.add_argument('-t', '--text', help='Print text')
-    parser.add_argument('-i', '--image', help='Print image')
-    parser.add_argument('-p', '--profile', help='Use profile (portrait, landscape, document, high_contrast, light)')
-    parser.add_argument('--threshold', type=int, help='Binarization threshold 0-255 (higher = less black)')
-    parser.add_argument('--brightness', type=float, help='Brightness multiplier (<1 = darker, >1 = brighter)')
-    parser.add_argument('--contrast', type=float, help='Contrast multiplier (<1 = less contrast, >1 = more contrast)')
-    parser.add_argument('-q', '--qr', help='Print QR code')
-    parser.add_argument('--qr-size', type=int, default=500, help='QR code width in pixels (default 500, max 576)')
-    parser.add_argument('-f', '--font-size', type=int, default=24, help='Font size')
-    parser.add_argument('-d', '--density', type=int, help='Heat density 0-100')
-    parser.add_argument('--test', action='store_true', help='Print test page')
-    parser.add_argument('--pattern-test', action='store_true', help='Print pattern test (line/column/multi-packet)')
-    parser.add_argument('--density-test', action='store_true', help='Print heat density test')
-    parser.add_argument('--status', action='store_true', help='Get printer status')
-    parser.add_argument('--battery', action='store_true', help='Get battery level')
-    parser.add_argument('--list-profiles', action='store_true', help='List available profiles')
-    parser.add_argument('--pickup-code', help='Print a pickup code in large bold style')
+    parser = argparse.ArgumentParser(
+        description='Paperang P2 Printer Control',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+examples:
+  paperang_p2.py print text "Hello"
+  paperang_p2.py print image photo.jpg --profile high_contrast
+  paperang_p2.py print qr "https://example.com"
+  paperang_p2.py print pickup "19-4308"
+  paperang_p2.py print test
+  paperang_p2.py info all
+  paperang_p2.py info battery
+  paperang_p2.py feed 100
+  paperang_p2.py profile list
+        """)
+    sub = parser.add_subparsers(dest='cmd', required=True)
+
+    # ── print ──
+    p_text = sub.add_parser('text', help='Print text')
+    p_text.add_argument('content', help='Text to print')
+    _add_profile_args(p_text)
+    p_text.add_argument('--font-size', type=int, default=24, help='Font size (12-96, default 24)')
+    p_text.set_defaults(func=cmd_print_text)
+
+    p_img = sub.add_parser('image', help='Print image (local file or URL)')
+    p_img.add_argument('path', help='Image file path or URL')
+    _add_profile_args(p_img)
+    _add_image_args(p_img)
+    p_img.set_defaults(func=cmd_print_image)
+
+    p_qr = sub.add_parser('qr', help='Print QR code')
+    p_qr.add_argument('content', help='QR code content')
+    _add_profile_args(p_qr)
+    p_qr.add_argument('--qr-size', type=int, default=500, help='QR size in px (default 500)')
+    p_qr.set_defaults(func=cmd_print_qr)
+
+    p_pu = sub.add_parser('pickup', help='Print pickup code')
+    p_pu.add_argument('code', help='Pickup code')
+    _add_profile_args(p_pu)
+    p_pu.set_defaults(func=cmd_print_pickup)
+
+    p_t = sub.add_parser('test', help='Print test page')
+    _add_profile_args(p_t)
+    p_t.set_defaults(func=cmd_print_test)
+
+    # These can't use the --profile handler since they don't have those args
+    sub.add_parser('pattern', help='Print pattern test').set_defaults(func=cmd_print_pattern)
+    sub.add_parser('density', help='Print heat density test').set_defaults(func=cmd_print_density)
+
+    # ── info ──
+    p_info = sub.add_parser('info', help='Read printer telemetry')
+    choices = ['all'] + [k for k, _, _ in _INFO_FIELDS]
+    p_info.add_argument('field', nargs='?', default='all', choices=choices,
+                        help='Field to read (default: all)')
+    p_info.set_defaults(func=cmd_info)
+
+    # ── feed ──
+    p_feed = sub.add_parser('feed', help='Feed paper')
+    p_feed.add_argument('lines', nargs='?', type=int, default=100,
+                        help='Lines to feed (default 100)')
+    p_feed.set_defaults(func=cmd_feed)
+
+    # ── profile ──
+    p_prof = sub.add_parser('profile', help='Profile management')
+    p_prof.add_argument('action', choices=['list'], help='Action')
+    p_prof.set_defaults(func=cmd_profile_list)
 
     args = parser.parse_args()
 
-    # List profiles and exit
-    if args.list_profiles:
-        list_profiles(PROFILES_PATH)
-        return 0
-
-    # Load profile settings
-    profiles = load_profiles(PROFILES_PATH)
-    profile_settings = profiles.get(args.profile, {}) if args.profile else {}
-
-    # Use profile values or defaults
-    threshold = args.threshold if args.threshold is not None else profile_settings.get('threshold', 180)
-    brightness = args.brightness if args.brightness is not None else profile_settings.get('brightness', 1.5)
-    contrast = args.contrast if args.contrast is not None else profile_settings.get('contrast', 0.6)
-    heat_density = args.density if args.density is not None else profile_settings.get('heat_density', 75)
-
-    printer = PaperangP2()
-
     try:
-        printer.connect()
-
-        if args.test:
-            printer.print_test_page()
-        elif args.pattern_test:
-            printer.print_pattern_test()
-        elif args.density_test:
-            printer.print_heat_density_test()
-        elif args.status:
-            status = printer.get_status()
-            print(f"Status: {status}")
-        elif args.battery:
-            battery = printer.get_battery()
-            print(f"Battery: {battery}")
-        elif args.text:
-            printer.print_text(args.text, font_size=args.font_size, heat_density=heat_density)
-        elif args.image:
-            printer.print_image(
-                args.image, heat_density=heat_density,
-                threshold=threshold, brightness=brightness,
-                contrast=contrast)
-        elif args.qr:
-            printer.print_qr(args.qr, heat_density=heat_density, max_width=args.qr_size)
-        elif args.pickup_code:
-            printer.print_pickup_code(args.pickup_code, heat_density=heat_density)
-        else:
-            # Default test text
-            test_text = """Paperang P2 Test Print
-==================
-Printer working!
-
-Time: """ + os.popen('date "+%Y-%m-%d %H:%M:%S"').read().strip()
-            printer.print_text(test_text, heat_density=heat_density)
-
-        print("Print complete!")
+        args.func(args)
         return 0
-
     except Exception as e:
         print(f"Error: {e}")
         return 1

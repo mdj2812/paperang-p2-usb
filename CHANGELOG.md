@@ -1,5 +1,30 @@
 # Changelog
 
+## v1.4.0 (2026-05-12)
+
+### Changed
+- **Breaking**: CLI redesigned with subcommands (`text`, `image`, `qr`, `pickup`,
+  `test`, `pattern`, `density`, `info`, `feed`, `profile list`)
+- Old flat flags (`-t`, `-i`, `-q`, `--pickup-code`, `--status`, etc.) removed
+
+### Added
+- `info` subcommand: read all printer telemetry (16 fields)
+- `feed` subcommand: feed paper by line count
+- `pattern` and `density` subcommands: print test patterns
+- Profile system: `--profile` flag applies profile defaults to any print command
+
+### Examples
+
+```bash
+python3 paperang_p2.py text "Hello" --font-size 48
+python3 paperang_p2.py image photo.jpg --profile high_contrast
+python3 paperang_p2.py qr "https://example.com"
+python3 paperang_p2.py pickup "19-4308"
+python3 paperang_p2.py info              # all fields
+python3 paperang_p2.py info version      # single field
+python3 paperang_p2.py feed 50
+```
+
 ## v1.3.0 (2026-05-08)
 
 ### Changed

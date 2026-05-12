@@ -1,178 +1,137 @@
 # Paperang P2 USB Printer
 
-Control Paperang P2 thermal printer via USB on Linux systems.
-
-Core logic powered by [paperang-p2-lib](https://github.com/mdj2812/paperang-p2-lib).
-
-Based on [hurui200320/java-paperang-p2-usb](https://github.com/hurui200320/java-paperang-p2-usb) protocol implementation.
-
-## Features
-
-- **Text Printing** - CJK font support (Chinese, Japanese, Korean) with adjustable size
-- **Image Printing** - Adjustable threshold, brightness, and contrast
-- **QR Code Printing** - Auto-sized to fill paper width
-- **Pickup Code Printing** - Large bold centered codes (e.g. "19-4308")
-- **Print Profiles** - Pre-configured settings for portraits, landscapes, documents
-- **Status Reading** - Battery level and printer status
-
-## Project Structure
-
-This repo contains:
-- **CLI** (`paperang_p2.py`) — command-line interface for direct printing
-- **[examples/](examples/)** — Example integrations (MQTT print service etc.)
-
-Core logic (USB protocol, print functions, fonts, profiles) lives in [paperang-p2-lib](https://github.com/mdj2812/paperang-p2-lib) (installed via pip).
-
-## Installation
-
-```bash
-git clone https://github.com/mdj2812/paperang-p2-usb.git
-cd paperang-p2-usb
-pip3 install -r requirements.txt
-```
+Python CLI and library for the Paperang P2 thermal printer. Supports printing text, images, QR codes, pickup codes, and reading all printer telemetry.
 
 ## Quick Start
 
 ```bash
 # Print text
-python3 paperang_p2.py -t "Hello World"
+python3 paperang_p2.py text "Hello World"
+python3 paperang_p2.py text "你好世界" --font-size 48 --density 80
 
-# Print image with profile
-python3 paperang_p2.py -i photo.jpg -p portrait
-
-# Print QR code
-python3 paperang_p2.py -q "https://example.com"
-
-# List available profiles
-python3 paperang_p2.py --list-profiles
-```
-
-## Command Line Usage
-
-### Print Text
-
-```bash
-# Basic text
-python3 paperang_p2.py -t "Hello World"
-
-# Custom font size and density
-python3 paperang_p2.py -t "Dark text" -f 48 -d 100
-
-# Chinese/Japanese/Korean text
-python3 paperang_p2.py -t "一二三 ABC" -f 48
-```
-
-### Print Image
-
-```bash
-# With default settings
-python3 paperang_p2.py -i photo.jpg
-
-# With profile
-python3 paperang_p2.py -i photo.jpg -p portrait
-
-# With custom parameters
-python3 paperang_p2.py -i photo.jpg --threshold 180 --brightness 1.5 --contrast 0.6
-```
-
-### Print Pickup Code
-
-Large bold centered text, perfect for printing pickup codes on receipts:
-
-```bash
-# Basic pickup code (96px, max density, centered)
-python3 paperang_p2.py --pickup-code "19-4308"
-
-# Custom code with any format
-python3 paperang_p2.py --pickup-code "A-1234"
-```
-
-Features:
-- 96px font size for maximum readability
-- Auto-centered on paper
-- Maximum heat density (100%) for bold, clear text
-- Perfect for courier/parcel pickup codes
-
-### Print QR Code
-
-```bash
-# Basic QR code (auto-sized)
-python3 paperang_p2.py -q "https://example.com"
-
-# Custom size
-python3 paperang_p2.py -q "https://example.com" --qr-size 400
-```
-
-### Test Functions
-
-```bash
-# Print test page
-python3 paperang_p2.py --test
-
-# Pattern test (lines, columns, multi-packet)
-python3 paperang_p2.py --pattern-test
-
-# Heat density test
-python3 paperang_p2.py --density-test
-
-# Get status/battery
-python3 paperang_p2.py --status
-python3 paperang_p2.py --battery
-```
-
-## Print Profiles
-
-Pre-configured settings optimized for different content types:
-
-| Profile | Threshold | Brightness | Contrast | Heat Density | Best For |
-|---------|-----------|------------|----------|--------------|----------|
-| `portrait` | 180 | 1.5 | 0.6 | 55 | Photos with faces/glasses |
-| `landscape` | 150 | 1.1 | 0.8 | 70 | Nature/scenery photos |
-| `document` | 128 | 1.0 | 1.0 | 75 | Text documents |
-| `high_contrast` | 100 | 1.0 | 1.2 | 85 | Bold/high-contrast images |
-| `light` | 200 | 1.3 | 0.5 | 45 | Saving paper/ink |
-
-View all profiles: `python3 paperang_p2.py --list-profiles`
-
-## Python API
-
-> For the full API and protocol details, see [paperang-p2-lib](https://github.com/mdj2812/paperang-p2-lib).
-
-```python
-from paperang import PaperangP2
-
-printer = PaperangP2()
-printer.connect()
-
-# Print text
-printer.print_text("Hello", font_size=24, heat_density=75)
-
-# Print image with custom parameters
-printer.print_image("photo.jpg", heat_density=75, threshold=180, brightness=1.5, contrast=0.6)
+# Print image (local file or URL)
+python3 paperang_p2.py image photo.jpg --profile high_contrast
+python3 paperang_p2.py image https://example.com/photo.jpg --profile portrait
 
 # Print QR code
-printer.print_qr("https://example.com", max_width=500)
+python3 paperang_p2.py qr "https://example.com" --qr-size 400
 
-# Manual control
-printer.set_heat_density(75)
-printer.feed(100)
-printer.set_paper_type(0)
+# Print pickup code
+python3 paperang_p2.py pickup "19-4308"
+
+# Print test pages
+python3 paperang_p2.py test
+python3 paperang_p2.py pattern
+python3 paperang_p2.py density
+
+# Read telemetry
+python3 paperang_p2.py info              # all fields
+python3 paperang_p2.py info battery      # just battery
+python3 paperang_p2.py info version      # firmware version
+python3 paperang_p2.py info voltage      # battery voltage mV
+python3 paperang_p2.py info temperature  # head temp
+python3 paperang_p2.py info model        # printer model
+python3 paperang_p2.py info serial       # serial number
+
+# Feed paper
+python3 paperang_p2.py feed 50
+
+# List print profiles
+python3 paperang_p2.py profile list
 ```
 
-## Troubleshooting
+## Subcommands
 
-1. **Permission denied:** Add udev rules or use sudo
-2. **Device not found:** Check with `lsusb | grep 4348`
-3. **Print too light:** Increase heat density (`-d 100`)
-4. **Print too dark:** Decrease heat density (`-d 50`)
-5. **No response:** Verify printer is powered on with paper
+### `text <content>`
 
-## References
+Print text.
 
-- [java-paperang-p2-usb](https://github.com/hurui200320/java-paperang-p2-usb) - Java implementation
-- [python-paperang](https://github.com/tinyprinter/python-paperang) - Python Bluetooth version
-- [Paperang protocol blog](https://www.ihcblog.com/miaomiaoji/) - Chinese blog post
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--font-size N` | 24 | Font size (12–96) |
+| `--density N` | 75 | Heat density (0–100) |
+| `--profile NAME` | — | Use image profile settings |
+
+### `image <path|url>`
+
+Print image from local file or remote URL.
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--profile NAME` | — | Image profile |
+| `--density N` | 75 | Heat density (0–100) |
+| `--threshold N` | 128 | Binarization threshold (0–255) |
+| `--brightness N` | 1.0 | Brightness multiplier |
+| `--contrast N` | 1.0 | Contrast multiplier |
+
+### `qr <content>`
+
+Print QR code.
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--qr-size N` | 500 | QR code size in px (100–576) |
+| `--density N` | 75 | Heat density (0–100) |
+| `--profile NAME` | — | Use image profile settings |
+
+### `pickup <code>`
+
+Print large pickup code.
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--density N` | 100 | Heat density (0–100) |
+| `--profile NAME` | — | Use image profile settings |
+
+### `test`
+
+Print built-in test page.
+
+### `pattern`
+
+Print pattern test (line/column/multi-packet).
+
+### `density`
+
+Print heat density test pattern.
+
+### `info [field]`
+
+Read printer telemetry. Without arguments, shows all fields.
+
+Available fields: `battery`, `status`, `voltage`, `temperature`, `heat`, `paper`, `version`, `model`, `serial`, `board`, `hw`, `mac`, `country`, `max_gap`, `power_down`, `factory`
+
+### `feed [lines]`
+
+Feed paper. Default 100 lines.
+
+### `profile list`
+
+List available print profiles.
+
+## Profiles
+
+Profiles are loaded from `profiles.json` in the script directory. Each profile can specify:
+
+```json
+{
+  "portrait": {
+    "threshold": 180,
+    "brightness": 1.5,
+    "contrast": 0.6,
+    "heat_density": 80
+  }
+}
+```
+
+CLI flags override profile settings.
+
+## Requirements
+
+- Python 3.8+
+- `paperang-p2-lib >= 0.3.6`
+- USB access to Paperang P2 printer (may need `sudo`)
 
 ## License
 
-MIT License
+MIT
