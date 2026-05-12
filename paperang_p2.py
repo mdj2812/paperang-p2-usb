@@ -7,7 +7,6 @@ Thin wrapper around paperang-p2-lib.
 import sys
 import os
 import argparse
-from datetime import datetime
 
 from paperang import PaperangP2, load_profiles, list_profiles
 
@@ -147,8 +146,7 @@ def cmd_print_pickup(args):
 
 
 def cmd_print_test(args):
-    profiles = load_profiles(PROFILES_PATH)
-    params = _resolve(profiles, args.profile, args)
+    _ = args  # unused, but kept for uniform handler signature
     p = _connect()
     try:
         p.print_test_page()
