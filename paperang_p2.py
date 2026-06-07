@@ -8,6 +8,8 @@ import sys
 import os
 import argparse
 
+from contextlib import contextmanager
+
 from paperang import PaperangP2, load_profiles, list_profiles
 
 
@@ -39,10 +41,18 @@ def _resolve(profiles, profile, args):
     }
 
 
-def _connect():
+@contextmanager
+def connect_printer():
+    """Context manager that yields a connected PaperangP2 and
+    disposes USB resources on exit."""
     p = PaperangP2()
     p.connect()
-    return p
+    try:
+        yield p
+    finally:
+        if p.dev:
+            import usb.util
+            usb.util.dispose_resources(p.dev)
 
 
 # ── info handlers ───────────────────────────────────────────────
@@ -70,8 +80,7 @@ _INFO_MAP = {k: (label, fn) for k, label, fn in _INFO_FIELDS}
 
 
 def cmd_info(args):
-    p = _connect()
-    try:
+    with connect_printer() as p:
         if args.field == "all":
             print("Paperang P2 Telemetry")
             print("=" * 30)
@@ -82,10 +91,6 @@ def cmd_info(args):
             label, fn = _INFO_MAP[args.field]
             val = fn(p)
             print(f"{label}: {val}")
-    finally:
-        if p.dev:
-            import usb.util
-            usb.util.dispose_resources(p.dev)
 
 
 # ── print handlers ──────────────────────────────────────────────
@@ -93,97 +98,57 @@ def cmd_info(args):
 def cmd_print_text(args):
     profiles = load_profiles(PROFILES_PATH)
     params = _resolve(profiles, args.profile, args)
-    p = _connect()
-    try:
+    with connect_printer() as p:
         p.print_text(
             args.content, font_size=args.font_size,
             heat_density=params['heat_density'])
-    finally:
-        if p.dev:
-            import usb.util
-            usb.util.dispose_resources(p.dev)
 
 
 def cmd_print_image(args):
     profiles = load_profiles(PROFILES_PATH)
     params = _resolve(profiles, args.profile, args)
-    p = _connect()
-    try:
+    with connect_printer() as p:
         p.print_image(
             args.path, heat_density=params['heat_density'],
             threshold=params['threshold'], brightness=params['brightness'],
             contrast=params['contrast'])
-    finally:
-        if p.dev:
-            import usb.util
-            usb.util.dispose_resources(p.dev)
 
 
 def cmd_print_qr(args):
     profiles = load_profiles(PROFILES_PATH)
     params = _resolve(profiles, args.profile, args)
-    p = _connect()
-    try:
+    with connect_printer() as p:
         p.print_qr(
             args.content, heat_density=params['heat_density'],
             max_width=args.qr_size)
-    finally:
-        if p.dev:
-            import usb.util
-            usb.util.dispose_resources(p.dev)
 
 
 def cmd_print_pickup(args):
     profiles = load_profiles(PROFILES_PATH)
     params = _resolve(profiles, args.profile, args)
-    p = _connect()
-    try:
+    with connect_printer() as p:
         p.print_pickup_code(args.code, heat_density=params['heat_density'])
-    finally:
-        if p.dev:
-            import usb.util
-            usb.util.dispose_resources(p.dev)
 
 
 def cmd_print_test(args):
     _ = args  # unused, but kept for uniform handler signature
-    p = _connect()
-    try:
+    with connect_printer() as p:
         p.print_test_page()
-    finally:
-        if p.dev:
-            import usb.util
-            usb.util.dispose_resources(p.dev)
 
 
 def cmd_print_pattern(args):
-    p = _connect()
-    try:
+    with connect_printer() as p:
         p.print_pattern_test()
-    finally:
-        if p.dev:
-            import usb.util
-            usb.util.dispose_resources(p.dev)
 
 
 def cmd_print_density(args):
-    p = _connect()
-    try:
+    with connect_printer() as p:
         p.print_heat_density_test()
-    finally:
-        if p.dev:
-            import usb.util
-            usb.util.dispose_resources(p.dev)
 
 
 def cmd_feed(args):
-    p = _connect()
-    try:
+    with connect_printer() as p:
         p.feed(args.lines)
-    finally:
-        if p.dev:
-            import usb.util
-            usb.util.dispose_resources(p.dev)
 
 
 def cmd_profile_list(args):
