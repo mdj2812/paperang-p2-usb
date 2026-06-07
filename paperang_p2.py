@@ -198,11 +198,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 examples:
-  paperang_p2.py print text "Hello"
-  paperang_p2.py print image photo.jpg --profile high_contrast
-  paperang_p2.py print qr "https://example.com"
-  paperang_p2.py print pickup "19-4308"
-  paperang_p2.py print test
+  paperang_p2.py text "Hello"
+  paperang_p2.py image photo.jpg --profile high_contrast
+  paperang_p2.py qr "https://example.com"
+  paperang_p2.py pickup "19-4308"
+  paperang_p2.py test
   paperang_p2.py info all
   paperang_p2.py info battery
   paperang_p2.py feed 100
