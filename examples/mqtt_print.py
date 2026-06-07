@@ -5,6 +5,7 @@ Subscribes to MQTT topics and prints messages
 """
 
 import json
+import os
 import argparse
 import paho.mqtt.client as mqtt
 from paperang import PaperangP2
@@ -104,13 +105,11 @@ class MqttPrintClient:
                 
             # Use profile if specified
             if profile:
-                profiles = {
-                    "portrait": {"threshold": 180, "brightness": 1.5, "contrast": 0.6, "heat_density": 55},
-                    "landscape": {"threshold": 150, "brightness": 1.1, "contrast": 0.8, "heat_density": 70},
-                    "document": {"threshold": 128, "brightness": 1.0, "contrast": 1.0, "heat_density": 75},
-                    "high_contrast": {"threshold": 100, "brightness": 1.0, "contrast": 1.2, "heat_density": 85},
-                    "light": {"threshold": 200, "brightness": 1.3, "contrast": 0.5, "heat_density": 45}
-                }
+                _profiles_path = os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)), '..', 'profiles.json'
+                )
+                with open(_profiles_path) as f:
+                    profiles = json.load(f)
                 p = profiles.get(profile, {})
                 threshold = p.get("threshold", threshold)
                 brightness = p.get("brightness", brightness)
