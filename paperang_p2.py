@@ -52,9 +52,10 @@ def connect_printer():
     try:
         yield p
     finally:
-        if p.dev:
+        dev = getattr(p, 'dev', None)
+        if dev:
             import usb.util
-            usb.util.dispose_resources(p.dev)
+            usb.util.dispose_resources(dev)
 
 
 # ── info handlers ───────────────────────────────────────────────
