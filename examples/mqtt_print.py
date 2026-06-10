@@ -71,13 +71,16 @@ class MqttPrintClient:
         content = data.get("content", "")
         font_size = data.get("font_size", 24)
         heat_density = data.get("heat_density", 75)
+        vertical = data.get("vertical", False)
         
         if not content:
             print("Error: No content provided for text print")
             return
             
         try:
-            self.printer.print_text(content, font_size=font_size, heat_density=heat_density)
+            self.printer.print_text(content, font_size=font_size,
+                                    heat_density=heat_density,
+                                    vertical=vertical)
             print(f"Printed text: {content[:50]}...")
         except Exception as e:
             print(f"Print error: {e}")
@@ -90,11 +93,12 @@ class MqttPrintClient:
         threshold = data.get("threshold", 180)
         brightness = data.get("brightness", 1.5)
         contrast = data.get("contrast", 0.6)
-        
+        vertical = data.get("vertical", False)
+
         if not url:
             print("Error: No URL or path provided for image print")
             return
-            
+
         try:
             # Download image if URL
             if url.startswith("http"):
@@ -102,7 +106,7 @@ class MqttPrintClient:
                 local_path = "/tmp/mqtt_image.jpg"
                 urllib.request.urlretrieve(url, local_path)
                 url = local_path
-                
+
             # Use profile if specified
             if profile:
                 _profiles_path = os.path.join(
@@ -115,9 +119,10 @@ class MqttPrintClient:
                 brightness = p.get("brightness", brightness)
                 contrast = p.get("contrast", contrast)
                 heat_density = p.get("heat_density", heat_density)
-                
-            self.printer.print_image(url, heat_density=heat_density, 
-                                   threshold=threshold, brightness=brightness, contrast=contrast)
+
+            self.printer.print_image(url, heat_density=heat_density,
+                                   threshold=threshold, brightness=brightness,
+                                   contrast=contrast, vertical=vertical)
             print(f"Printed image: {url}")
         except Exception as e:
             print(f"Print error: {e}")
@@ -127,13 +132,15 @@ class MqttPrintClient:
         content = data.get("content", "")
         size = data.get("size", 500)
         heat_density = data.get("heat_density", 75)
+        vertical = data.get("vertical", False)
         
         if not content:
             print("Error: No content provided for QR print")
             return
             
         try:
-            self.printer.print_qr(content, heat_density=heat_density, max_width=size)
+            self.printer.print_qr(content, heat_density=heat_density,
+                                  max_width=size, vertical=vertical)
             print(f"Printed QR: {content[:50]}...")
         except Exception as e:
             print(f"Print error: {e}")
