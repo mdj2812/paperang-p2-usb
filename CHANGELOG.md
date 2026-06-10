@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.5.0 (2026-06-10)
+
+### Added
+- **Vertical printing support** — `--vertical` flag for `text`, `image`, `qr`,
+  and `pickup` subcommands. Rotates output 90° clockwise for labels, receipts,
+  and narrow-format printing.
+- MQTT print client: `vertical` field in JSON payloads for all print topics.
+
+### Changed
+- Minimum `paperang-p2-lib` dependency bumped to `>=1.2.0` (vertical printing API).
+
 ## v1.4.0 (2026-05-12)
 
 ### Changed
