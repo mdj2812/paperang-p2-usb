@@ -77,7 +77,9 @@ class MqttPrintClient:
             return
             
         try:
-            self.printer.print_text(content, font_size=font_size, heat_density=heat_density)
+            self.printer.print_text(content, font_size=font_size,
+                                   heat_density=heat_density,
+                                   vertical=data.get("vertical", False))
             print(f"Printed text: {content[:50]}...")
         except Exception as e:
             print(f"Print error: {e}")
@@ -117,7 +119,8 @@ class MqttPrintClient:
                 heat_density = p.get("heat_density", heat_density)
                 
             self.printer.print_image(url, heat_density=heat_density, 
-                                   threshold=threshold, brightness=brightness, contrast=contrast)
+                                   threshold=threshold, brightness=brightness, contrast=contrast,
+                                   vertical=data.get("vertical", False))
             print(f"Printed image: {url}")
         except Exception as e:
             print(f"Print error: {e}")
@@ -133,7 +136,8 @@ class MqttPrintClient:
             return
             
         try:
-            self.printer.print_qr(content, heat_density=heat_density, max_width=size)
+            self.printer.print_qr(content, heat_density=heat_density, max_width=size,
+                                  vertical=data.get("vertical", False))
             print(f"Printed QR: {content[:50]}...")
         except Exception as e:
             print(f"Print error: {e}")

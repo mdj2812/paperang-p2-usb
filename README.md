@@ -8,16 +8,20 @@ Python CLI and library for the Paperang P2 thermal printer. Supports printing te
 # Print text
 python3 paperang_p2.py text "Hello World"
 python3 paperang_p2.py text "你好世界" --font-size 48 --density 80
+python3 paperang_p2.py text "LABEL" --vertical --font-size 40
 
 # Print image (local file or URL)
 python3 paperang_p2.py image photo.jpg --profile high_contrast
 python3 paperang_p2.py image https://example.com/photo.jpg --profile portrait
+python3 paperang_p2.py image logo.png --vertical
 
 # Print QR code
 python3 paperang_p2.py qr "https://example.com" --qr-size 400
+python3 paperang_p2.py qr "https://example.com" --vertical
 
 # Print pickup code
 python3 paperang_p2.py pickup "19-4308"
+python3 paperang_p2.py pickup "19-4308" --vertical
 
 # Print test pages
 python3 paperang_p2.py test
@@ -51,6 +55,7 @@ Print text.
 | `--font-size N` | 24 | Font size (12–96) |
 | `--density N` | 75 | Heat density (0–100) |
 | `--profile NAME` | — | Use image profile settings |
+| `--vertical` | — | Print vertically (rotate 90° clockwise) |
 
 ### `image <path|url>`
 
@@ -63,6 +68,7 @@ Print image from local file or remote URL.
 | `--threshold N` | 128 | Binarization threshold (0–255) |
 | `--brightness N` | 1.0 | Brightness multiplier |
 | `--contrast N` | 1.0 | Contrast multiplier |
+| `--vertical` | — | Print vertically (rotate 90° clockwise) |
 
 ### `qr <content>`
 
@@ -73,6 +79,7 @@ Print QR code.
 | `--qr-size N` | 500 | QR code size in px (100–576) |
 | `--density N` | 75 | Heat density (0–100) |
 | `--profile NAME` | — | Use image profile settings |
+| `--vertical` | — | Print vertically (rotate 90° clockwise) |
 
 ### `pickup <code>`
 
@@ -82,6 +89,7 @@ Print large pickup code.
 |------|---------|-------------|
 | `--density N` | 100 | Heat density (0–100) |
 | `--profile NAME` | — | Use image profile settings |
+| `--vertical` | — | Print vertically (rotate 90° clockwise) |
 
 ### `test`
 
@@ -129,7 +137,7 @@ CLI flags override profile settings.
 ## Requirements
 
 - Python 3.8+
-- `paperang-p2-lib >= 0.3.6`
+- `paperang-p2-lib >= 1.2.0`
 - USB access to Paperang P2 printer (may need `sudo`)
 
 ## License
