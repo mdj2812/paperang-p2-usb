@@ -27,6 +27,8 @@ def _add_image_args(parser):
     parser.add_argument('--threshold', type=int, help='Binarization threshold')
     parser.add_argument('--brightness', type=float, help='Brightness multiplier')
     parser.add_argument('--contrast', type=float, help='Contrast multiplier')
+    parser.add_argument('--vertical', action='store_true',
+                        help='Rotate 90° for vertical print orientation')
 
 
 def _resolve(profiles, profile, args):
@@ -101,7 +103,8 @@ def cmd_print_text(args):
     with connect_printer() as p:
         p.print_text(
             args.content, font_size=args.font_size,
-            heat_density=params['heat_density'])
+            heat_density=params['heat_density'],
+            vertical=args.vertical)
 
 
 def cmd_print_image(args):
@@ -111,7 +114,7 @@ def cmd_print_image(args):
         p.print_image(
             args.path, heat_density=params['heat_density'],
             threshold=params['threshold'], brightness=params['brightness'],
-            contrast=params['contrast'])
+            contrast=params['contrast'], vertical=args.vertical)
 
 
 def cmd_print_qr(args):
@@ -120,18 +123,19 @@ def cmd_print_qr(args):
     with connect_printer() as p:
         p.print_qr(
             args.content, heat_density=params['heat_density'],
-            max_width=args.qr_size)
+            max_width=args.qr_size, vertical=args.vertical)
 
 
 def cmd_print_pickup(args):
     profiles = load_profiles(PROFILES_PATH)
     params = _resolve(profiles, args.profile, args)
     with connect_printer() as p:
-        p.print_pickup_code(args.code, heat_density=params['heat_density'])
+        p.print_pickup_code(args.code, heat_density=params['heat_density'],
+                            vertical=args.vertical)
 
 
 def cmd_print_test(args):
-    _ = args  # unused, but kept for uniform handler signature
+    _ = args
     with connect_printer() as p:
         p.print_test_page()
 
@@ -165,6 +169,7 @@ def main():
 examples:
   paperang_p2.py text "Hello"
   paperang_p2.py image photo.jpg --profile high_contrast
+  paperang_p2.py image photo.jpg --vertical
   paperang_p2.py qr "https://example.com"
   paperang_p2.py pickup "19-4308"
   paperang_p2.py test
@@ -179,7 +184,10 @@ examples:
     p_text = sub.add_parser('text', help='Print text')
     p_text.add_argument('content', help='Text to print')
     _add_profile_args(p_text)
-    p_text.add_argument('--font-size', type=int, default=24, help='Font size (12-96, default 24)')
+    p_text.add_argument('--font-size', type=int, default=24,
+                        help='Font size (12-96, default 24)')
+    p_text.add_argument('--vertical', action='store_true',
+                        help='Rotate 90° for vertical print orientation')
     p_text.set_defaults(func=cmd_print_text)
 
     p_img = sub.add_parser('image', help='Print image (local file or URL)')
@@ -191,19 +199,23 @@ examples:
     p_qr = sub.add_parser('qr', help='Print QR code')
     p_qr.add_argument('content', help='QR code content')
     _add_profile_args(p_qr)
-    p_qr.add_argument('--qr-size', type=int, default=500, help='QR size in px (default 500)')
+    p_qr.add_argument('--qr-size', type=int, default=500,
+                      help='QR size in px (default 500)')
+    p_qr.add_argument('--vertical', action='store_true',
+                      help='Rotate 90° for vertical print orientation')
     p_qr.set_defaults(func=cmd_print_qr)
 
     p_pu = sub.add_parser('pickup', help='Print pickup code')
     p_pu.add_argument('code', help='Pickup code')
     _add_profile_args(p_pu)
+    p_pu.add_argument('--vertical', action='store_true',
+                      help='Rotate 90° for vertical print orientation')
     p_pu.set_defaults(func=cmd_print_pickup)
 
     p_t = sub.add_parser('test', help='Print test page')
     _add_profile_args(p_t)
     p_t.set_defaults(func=cmd_print_test)
 
-    # These can't use the --profile handler since they don't have those args
     sub.add_parser('pattern', help='Print pattern test').set_defaults(func=cmd_print_pattern)
     sub.add_parser('density', help='Print heat density test').set_defaults(func=cmd_print_density)
 
